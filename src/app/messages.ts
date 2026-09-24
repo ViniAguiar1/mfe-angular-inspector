@@ -17,7 +17,7 @@ type Messages = {
 
 export const MESSAGES: Record<Locale, Messages> = {
   pt: {
-    title: "Este painel é um app Angular com deploy próprio (v2)",
+    title: "Este painel é um app Angular com deploy próprio",
     framework: "Framework",
     origin: "Carregado de",
     build: "Build",

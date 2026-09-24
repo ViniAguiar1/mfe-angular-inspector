@@ -1,6 +1,14 @@
-import { bootstrapApplication } from '@angular/platform-browser';
-import { appConfig } from './app/app.config';
-import { App } from './app/app';
+import { provideZonelessChangeDetection } from "@angular/core"
+import { createApplication } from "@angular/platform-browser"
+import { createCustomElement } from "@angular/elements"
+import { InspectorComponent } from "./app/inspector.component"
 
-bootstrapApplication(App, appConfig)
-  .catch((err) => console.error(err));
+const TAG = "mfe-inspector"
+
+// Registrar o mesmo nome duas vezes lança erro no browser — acontece se o
+// hospedeiro importar o módulo de novo (navegação entre posts, HMR).
+if (!customElements.get(TAG)) {
+  createApplication({ providers: [provideZonelessChangeDetection()] }).then((app) => {
+    customElements.define(TAG, createCustomElement(InspectorComponent, { injector: app.injector }))
+  })
+}

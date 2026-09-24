@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>mfe-angular-inspector</title>
+  <meta name="description" content="An Angular 22 micro frontend published as a single ES module that registers the <mfe-inspector> custom element.">
+  <style>
+    :root { --bg: #fafafa; --fg: #111; --mu: #6b6b6b; --line: #e4e4e4; --accent: #dd0031; color-scheme: light; }
+    :root.dark { --bg: #0a0a0a; --fg: #ededed; --mu: #9a9a9a; --line: #2a2a2a; color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.6 system-ui, sans-serif; }
+    main { max-width: 720px; margin: 0 auto; padding: 64px 16px; }
+    .eyebrow { font: 12px ui-monospace, Menlo, monospace; color: var(--accent); letter-spacing: .08em; text-transform: uppercase; margin: 0 0 12px; }
+    h1 { font-size: clamp(28px, 5vw, 40px); line-height: 1.1; margin: 0 0 16px; font-weight: 600; }
+    p { margin: 0 0 16px; color: var(--mu); }
+    .controls { display: flex; flex-wrap: wrap; gap: 8px; margin: 32px 0 12px; font: 13px ui-monospace, Menlo, monospace; }
+    button { font: inherit; color: var(--fg); background: transparent; border: 1px solid var(--line); padding: 6px 10px; cursor: pointer; }
+    button[aria-pressed="true"] { border-color: var(--accent); }
+    mfe-inspector { border: 1px solid var(--line); min-height: 320px; }
+    #event { font: 12px ui-monospace, Menlo, monospace; color: var(--mu); margin-top: 8px; min-height: 1.6em; }
+    code { font: 14px ui-monospace, Menlo, monospace; color: var(--fg); }
+    a { color: var(--fg); }
+    footer { margin-top: 40px; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">micro frontend</p>
+    <h1 id="title"></h1>
+    <p id="lead"></p>
+
+    <div class="controls" role="group" aria-label="locale">
+      <button data-locale="pt">pt</button><button data-locale="en">en</button><button data-locale="es">es</button><button data-locale="jp">jp</button><button data-locale="fr">fr</button>
+      <span aria-hidden="true">·</span>
+      <button data-theme="light">light</button><button data-theme="dark">dark</button>
+    </div>
+    <mfe-inspector></mfe-inspector>
+    <p id="event"></p>
+
+    <p id="usage"></p>
+    <p><code>&lt;script type="module" src="https://mfe-angular-inspector.aguiarlabs.com.br/inspector.js"&gt;&lt;/script&gt;<br>&lt;mfe-inspector locale="en" theme="dark"&gt;&lt;/mfe-inspector&gt;</code></p>
+
+    <footer>
+      <a id="post" href="#"></a> · <a href="https://github.com/ViniAguiar1/mfe-angular-inspector">GitHub</a>
+    </footer>
+  </main>
+
+  <script type="module">
+    import "./inspector.js"
+
+    const COPY = {
+      pt: { title: "Bem-vindo ao micro frontend", lead: "Este domínio serve um único arquivo, inspector.js: um app Angular 22 que registra o custom element <mfe-inspector>. Aqui ele roda sozinho, sem nenhum site em volta. Troque o idioma e o tema abaixo: é o mesmo contrato que o blog usa.", usage: "Para usar em qualquer página:", post: "Leia o post do experimento", event: "Evento mfe:ping recebido pela página: Angular {v}" },
+      en: { title: "Welcome to the micro frontend", lead: "This domain serves a single file, inspector.js: an Angular 22 app that registers the <mfe-inspector> custom element. Here it runs on its own, with no site around it. Switch the language and theme below: it's the same contract the blog uses.", usage: "To use it on any page:", post: "Read the experiment post", event: "mfe:ping event received by the page: Angular {v}" },
+      es: { title: "Bienvenido al micro frontend", lead: "Este dominio sirve un único archivo, inspector.js: una app Angular 22 que registra el custom element <mfe-inspector>. Aquí funciona sola, sin ningún sitio alrededor. Cambia el idioma y el tema abajo: es el mismo contrato que usa el blog.", usage: "Para usarlo en cualquier página:", post: "Lee el post del experimento", event: "Evento mfe:ping recibido por la página: Angular {v}" },
+      jp: { title: "マイクロフロントエンドへようこそ", lead: "このドメインが配信するのは inspector.js という一つのファイルだけです。カスタム要素 <mfe-inspector> を登録する Angular 22 のアプリで、ここでは周りにサイトがない状態で単独で動いています。下で言語とテーマを切り替えてみてください。ブログが使っているのと同じコントラクトです。", usage: "任意のページで使うには：", post: "実験の記事を読む", event: "ページが mfe:ping イベントを受信：Angular {v}" },
+      fr: { title: "Bienvenue sur le micro frontend", lead: "Ce domaine sert un seul fichier, inspector.js : une app Angular 22 qui enregistre le custom element <mfe-inspector>. Ici, il tourne seul, sans aucun site autour. Changez la langue et le thème ci-dessous : c'est le même contrat que celui du blog.", usage: "Pour l'utiliser sur n'importe quelle page :", post: "Lire l'article de l'expérience", event: "Événement mfe:ping reçu par la page : Angular {v}" },
+    }
+    const HTML_LANG = { pt: "pt-BR", en: "en", es: "es", jp: "ja", fr: "fr" }
+
+    const el = document.querySelector("mfe-inspector")
+    const state = {
+      locale: (navigator.language || "en").toLowerCase().startsWith("pt") ? "pt" : "en",
+      theme: matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light",
+    }
+    let lastEvent = null
+
+    function render() {
+      const c = COPY[state.locale]
+      document.documentElement.lang = HTML_LANG[state.locale]
+      document.documentElement.classList.toggle("dark", state.theme === "dark")
+      document.getElementById("title").textContent = c.title
+      document.getElementById("lead").textContent = c.lead
+      document.getElementById("usage").textContent = c.usage
+      const post = document.getElementById("post")
+      post.textContent = c.post
+      post.href = `https://viniciusaguiardev.com.br/${state.locale}/posts/micro-frontend-angular-inside-nextjs`
+      document.getElementById("event").textContent = lastEvent ? c.event.replace("{v}", lastEvent) : ""
+      el.setAttribute("locale", state.locale)
+      el.setAttribute("theme", state.theme)
+      for (const b of document.querySelectorAll("[data-locale]")) b.setAttribute("aria-pressed", String(b.dataset.locale === state.locale))
+      for (const b of document.querySelectorAll("[data-theme]")) b.setAttribute("aria-pressed", String(b.dataset.theme === state.theme))
+    }
+
+    document.querySelector(".controls").addEventListener("click", (e) => {
+      const b = e.target.closest("button")
+      if (!b) return
+      if (b.dataset.locale) state.locale = b.dataset.locale
+      if (b.dataset.theme) state.theme = b.dataset.theme
+      render()
+    })
+    el.addEventListener("mfe:ping", (e) => { lastEvent = e.detail?.angularVersion ?? "?"; render() })
+    render()
+  </script>
+</body>
+</html>

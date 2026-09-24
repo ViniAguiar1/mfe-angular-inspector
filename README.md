@@ -12,7 +12,7 @@ Micro frontend Angular 22 publicado como um único ES module (`inspector.js`) qu
 
 ```html
 <script type="module">
-  await import("https://mfe-angular-inspector.vercel.app/inspector.js")
+  await import("https://mfe-angular-inspector.aguiarlabs.com.br/inspector.js")
 </script>
 <mfe-inspector locale="en" theme="dark"></mfe-inspector>
 ```
